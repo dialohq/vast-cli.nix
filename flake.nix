@@ -13,6 +13,7 @@
         packages.default = pkgs.stdenv.mkDerivation rec {
           pname = "vast-cli";
           version = "0.3.1";
+          meta.mainProgram = "vastai";
           
           src = pkgs.fetchFromGitHub {
             owner = "vast-ai";
