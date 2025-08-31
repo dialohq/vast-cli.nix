@@ -10,25 +10,30 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
       perSystem = { config, self', inputs', pkgs, system, ... }: {
-        packages.default = pkgs.stdenv.mkDerivation {
+        packages.default = pkgs.stdenv.mkDerivation rec {
           pname = "vast-cli";
           version = "0.3.1";
-          src = ./.;
+          
+          src = pkgs.fetchFromGitHub {
+            owner = "vast-ai";
+            repo = "vast-cli";
+            rev = "252fe5a6a20ab433b000f09547a218968717dd0d";
+            sha256 = "sha256-lD6rEjBfhmL9NgQaRnvQECGQZDZ0PbAghkbtoRmF+NI=";
+          };
+          
           nativeBuildInputs = [ 
-            pkgs.uv
-            pkgs.python312
+            (pkgs.python312.withPackages (ps: with ps; [
+              requests
+              urllib3
+            ]))
           ];
-          dontStrip = true;
-          dontFixup = true;
-          buildPhase = ''
-            uv venv --no-cache --relocatable
-            uv sync --no-cache
-          '';
+          
           installPhase = ''
-            mkdir -p $out/
-            mv .venv/* $out/
+            mkdir -p $out/bin
+            cp vast.py $out/bin/vastai
+            chmod +x $out/bin/vastai
+            patchShebangs $out/bin/vastai
           '';
-          __noChroot = true;
         };
         devShells.default = pkgs.mkShell {
           inputsFrom = [ self'.packages.default ];
