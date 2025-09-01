@@ -36,6 +36,12 @@
             patchShebangs $out/bin/vastai
           '';
         };
+        
+        packages.generate-ssh-config = pkgs.writeScriptBin "generate-ssh-config" ''
+          #!${pkgs.python312.withPackages (ps: with ps; [ requests ])}/bin/python3
+          ${builtins.readFile ./generate-ssh-config.py}
+        '';
+        
         devShells.default = pkgs.mkShell {
           inputsFrom = [ self'.packages.default ];
         };
